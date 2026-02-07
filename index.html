@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snap.Store | Premium Online Shopping</title>
+    <style>
+        :root { --daraz-orange: #f85606; --bg: #f4f4f6; --text: #212121; }
+        body { font-family: 'Roboto', Helvetica, Arial, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+        
+        header { background: #fff; padding: 10px 15px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #ddd; }
+        
+        /* Updated Logo Styling */
+        #store-logo-container { display: flex; align-items: center; cursor: pointer; margin-bottom: 8px; }
+        #logo-img { height: 40px; vertical-align: middle; margin-right: 10px; border-radius: 4px; display: none; }
+        #logo-text { font-size: 30px; font-weight: 900; color: var(--daraz-orange); }
+
+        .search-container input { 
+            width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 4px; 
+            background: #eff0f5; outline: none; font-size: 14px; box-sizing: border-box; color: #757575;
+        }
+
+        .category-header { 
+            margin: 20px 15px 10px; font-size: 22px; font-weight: bold; 
+            border-left: 5px solid var(--daraz-orange); padding-left: 10px; color: #212121; letter-spacing: -0.5px;
+        }
+
+        .highlight { color: var(--daraz-orange); font-weight: bold; }
+
+        #home-view { display: block; padding-bottom: 40px; }
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 15px; }
+        
+        .product-card { background: #fff; overflow: hidden; border-radius: 4px; border: 1px solid #eee; cursor: pointer; }
+        .card-img { width: 100%; height: 180px; object-fit: cover; background: #eee; }
+        .card-info { padding: 8px; }
+        .card-info div:first-child { font-size: 13px; height: 32px; overflow: hidden; line-height: 1.2; }
+        .card-price { color: var(--daraz-orange); font-weight: bold; font-size: 16px; margin-top: 4px; }
+
+        footer { background: #fff; padding: 40px 20px; margin-top: 30px; text-align: center; border-top: 1px solid #eee; }
+        .footer-text { color: #666; line-height: 1.6; font-size: 14px; }
+
+        #product-view { display: none; padding: 20px 15px; background: #fff; }
+        .order-btn-large { background: var(--daraz-orange); color: #fff; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 4px; width: 100%; margin-top: 15px; cursor: pointer; }
+
+        #xv4-btn { position: fixed; bottom: 10px; right: 10px; opacity: 0.05; border: none; background: none; cursor: pointer; font-size: 10px; }
+
+        .admin-section { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; background: #fafafa; }
+        .manage-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px; border: 1px solid #eee; margin-bottom: 5px; border-radius: 4px; }
+        .del-btn { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div id="store-logo-container" onclick="showHome()">
+        <img id="logo-img" src="" alt="Logo">
+        <span id="logo-text">Snap.Store</span>
+    </div>
+    <div class="search-container">
+        <input type="text" id="searchInput" onkeyup="searchProducts()" placeholder="Search for products, brands and more">
+    </div>
+</header>
+
+<div id="home-view">
+    <div id="grid-search" class="product-grid" style="display:none; margin-top: 15px;"></div>
+    <div class="category-header main-cats">Man Fashion</div>
+    <div id="grid-man" class="product-grid main-cats"></div>
+    <div class="category-header main-cats">Girls Collection</div>
+    <div id="grid-girl" class="product-grid main-cats"></div>
+    <div class="category-header main-cats">Footwear</div>
+    <div id="grid-shoes" class="product-grid main-cats"></div>
+
+    <footer>
+        <div class="footer-text">
+            <h3>About <span id="footer-store-name">Snap.Store</span></h3>
+            <p>Welcome to your ultimate fashion destination.</p>
+            <p style="font-size: 11px; margin-top: 25px; color: #aaa;">© 2026 Snap.Store - All Rights Reserved.</p>
+        </div>
+    </footer>
+</div>
+
+<div id="product-view">
+    <button onclick="showHome()" style="padding: 8px 15px; margin-bottom: 15px; background: #eee; border:none; border-radius:4px; cursor:pointer;">← Back</button>
+    <div id="detail-content"></div>
+</div>
+
+<div id="admin-panel" style="display:none; padding: 20px; background: white;">
+    <button onclick="showHome()" style="padding: 8px 15px; margin-bottom: 15px; background: #eee; border:none; border-radius:4px; cursor:pointer;">← Back to Store</button>
+    <h3>Admin Dashboard</h3>
+    
+    <div class="admin-section">
+        <h4>Store Branding</h4>
+        <label style="font-size:12px;">Store Name</label>
+        <input type="text" id="adminStoreName" placeholder="Store Name" style="width:100%; margin-bottom:10px; padding:10px;">
+        <label style="font-size:12px;">Update Logo (Square Recommended)</label>
+        <input type="file" id="adminStoreLogo" accept="image/*" style="width:100%; margin-bottom:10px; padding:10px;">
+        <button onclick="updateBranding()" style="width:100%; padding:10px; background:#f85606; color:white; border:none; font-weight:bold; cursor:pointer;">SAVE BRANDING</button>
+    </div>
+
+    <div class="admin-section">
+        <h4>Contact & Security</h4>
+        <input type="text" id="newWp" placeholder="WhatsApp Number" style="width:100%; margin-bottom:10px; padding:10px;">
+        <input type="text" id="newKey" placeholder="Secret Password" style="width:100%; margin-bottom:10px; padding:10px;">
+        <button onclick="updateSettings()" style="width:100%; padding:10px; background:#444; color:white; border:none; font-weight:bold; cursor:pointer;">UPDATE SETTINGS</button>
+    </div>
+
+    <div class="admin-section">
+        <h4>Add New Product</h4>
+        <input type="text" id="pName" placeholder="Product Title" style="width:100%; margin-bottom:10px; padding:10px;">
+        <input type="text" id="pPrice" placeholder="Price" style="width:100%; margin-bottom:10px; padding:10px;">
+        <input type="text" id="pSize" placeholder="Sizes" style="width:100%; margin-bottom:10px; padding:10px;">
+        <select id="pCat" style="width:100%; margin-bottom:10px; padding:10px;">
+            <option value="man">Man Fashion</option>
+            <option value="girl">Girls Collection</option>
+            <option value="shoes">Footwear</option>
+        </select>
+        <textarea id="pDesc" placeholder="Description" style="width:100%; margin-bottom:10px; padding:10px; height:80px;"></textarea>
+        <input type="file" id="pImages" multiple accept="image/*" style="margin-bottom:15px;">
+        <button onclick="saveProduct()" style="width:100%; padding:15px; background:var(--daraz-orange); color:white; border:none; font-weight:bold; cursor:pointer;">POST PRODUCT</button>
+    </div>
+
+    <div class="admin-section">
+        <h4>Manage Products</h4>
+        <div id="admin-product-list"></div>
+    </div>
+</div>
+
+<button id="xv4-btn" onclick="showAdmin()">ADMIN</button>
+
+<script>
+    let whatsappNumber = localStorage.getItem('snap_wp') || "923108508266";
+    let secretKey = localStorage.getItem('snap_key') || "Pakistansaim#1";
+    let storedName = localStorage.getItem('snap_name') || "Snap.Store";
+
+    window.onload = function() {
+        loadLogo(); // Check and apply logo
+        applyBranding(); // Apply store name
+        loadStore();
+        renderAdminList();
+        
+        document.getElementById('newWp').value = whatsappNumber;
+        document.getElementById('newKey').value = secretKey;
+        document.getElementById('adminStoreName').value = storedName;
+    };
+
+    // --- LOGO LOGIC ---
+    function loadLogo() {
+        const logoData = localStorage.getItem('snap_logo');
+        const logoImg = document.getElementById('logo-img');
+        if (logoData) {
+            logoImg.src = logoData;
+            logoImg.style.display = 'inline-block';
+        } else {
+            logoImg.style.display = 'none';
+        }
+    }
+
+    function applyBranding() {
+        document.getElementById('logo-text').innerText = storedName;
+        document.getElementById('footer-store-name').innerText = storedName;
+    }
+
+    async function updateBranding() {
+        const newName = document.getElementById('adminStoreName').value;
+        const logoFile = document.getElementById('adminStoreLogo').files[0];
+        
+        if(newName) {
+            localStorage.setItem('snap_name', newName);
+            storedName = newName;
+        }
+
+        if(logoFile) {
+            const base64Logo = await convertToBase64(logoFile);
+            localStorage.setItem('snap_logo', base64Logo);
+        }
+        
+        alert("Branding Updated Successfully!");
+        location.reload();
+    }
+
+    // Helper: Convert File to Base64
+    function convertToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    // --- PRODUCT LOGIC ---
+    async function saveProduct() {
+        const name = document.getElementById('pName').value;
+        const price = document.getElementById('pPrice').value;
+        const size = document.getElementById('pSize').value;
+        const cat = document.getElementById('pCat').value;
+        const desc = document.getElementById('pDesc').value;
+        const files = document.getElementById('pImages').files;
+
+        if (name && price && files.length > 0) {
+            let imagesArray = [];
+            for (let file of files) { 
+                const base64 = await convertToBase64(file);
+                imagesArray.push(base64);
+            }
+            let products = JSON.parse(localStorage.getItem('snap_store_v1')) || [];
+            products.push({ name, price, size, cat, desc, images: imagesArray });
+            localStorage.setItem('snap_store_v1', JSON.stringify(products));
+            alert("Product Posted!");
+            location.reload();
+        } else {
+            alert("Please fill name, price and upload at least one image.");
+        }
+    }
+
+    function loadStore() {
+        const products = JSON.parse(localStorage.getItem('snap_store_v1')) || [];
+        ['man', 'girl', 'shoes'].forEach(c => {
+            const el = document.getElementById(`grid-${c}`);
+            if(el) el.innerHTML = '';
+        });
+        products.forEach((p, index) => {
+            const grid = document.getElementById(`grid-${p.cat}`);
+            if(grid) {
+                // p.images[0] is already Base64
+                grid.innerHTML += `
+                    <div class="product-card" onclick="openProduct(${index})">
+                        <img src="${p.images[0]}" class="card-img" onerror="this.src='https://placehold.co/400x400?text=No+Image'">
+                        <div class="card-info">
+                            <div>${p.name}</div>
+                            <div class="card-price">Rs. ${p.price}</div>
+                        </div>
+                    </div>`;
+            }
+        });
+    }
+
+    // --- OTHER UI FUNCTIONS ---
+    function showAdmin() {
+        let pass = prompt("Enter Secret Key:");
+        if(pass === secretKey) {
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('home-view').style.display = 'none';
+        } else { alert("Wrong Key!"); }
+    }
+
+    function updateSettings() {
+        const wp = document.getElementById('newWp').value;
+        const key = document.getElementById('newKey').value;
+        if(wp && key) {
+            localStorage.setItem('snap_wp', wp);
+            localStorage.setItem('snap_key', key);
+            alert("Settings Updated!");
+            location.reload();
+        }
+    }
+
+    function renderAdminList() {
+        const products = JSON.parse(localStorage.getItem('snap_store_v1')) || [];
+        const listContainer = document.getElementById('admin-product-list');
+        listContainer.innerHTML = '';
+        products.forEach((p, index) => {
+            listContainer.innerHTML += `
+                <div class="manage-item">
+                    <span>${p.name} (Rs. ${p.price})</span>
+                    <button class="del-btn" onclick="deleteProduct(${index})">Delete</button>
+                </div>`;
+        });
+    }
+
+    function deleteProduct(index) {
+        if(confirm("Are you sure?")) {
+            let products = JSON.parse(localStorage.getItem('snap_store_v1')) || [];
+            products.splice(index, 1);
+            localStorage.setItem('snap_store_v1', JSON.stringify(products));
+            location.reload();
+        }
+    }
+
+    function openProduct(index) {
+        const p = JSON.parse(localStorage.getItem('snap_store_v1'))[index];
+        document.getElementById('home-view').style.display = 'none';
+        document.getElementById('product-view').style.display = 'block';
+        const message = `Hello ${storedName}!%0AI want to order:%0AProduct: ${p.name}%0APrice: Rs. ${p.price}%0ASize: ${p.size}`;
+        document.getElementById('detail-content').innerHTML = `
+            <img src="${p.images[0]}" style="width:100%; border-radius:8px;">
+            <h2 style="margin:15px 0 5px;">${p.name}</h2>
+            <h3 style="color:var(--daraz-orange); margin:0;">Rs. ${p.price}</h3>
+            <p><b>Sizes:</b> ${p.size}</p>
+            <p style="white-space:pre-wrap; color:#555;">${p.desc}</p>
+            <button class="order-btn-large" onclick="window.open('https://wa.me/${whatsappNumber}?text=${message}')">ORDER ON WHATSAPP</button>
+        `;
+    }
+
+    function searchProducts() {
+        let query = document.getElementById('searchInput').value.toLowerCase();
+        let products = JSON.parse(localStorage.getItem('snap_store_v1')) || [];
+        let searchGrid = document.getElementById('grid-search');
+        let mainCats = document.querySelectorAll('.main-cats, .category-header');
+        if (query.length > 0) {
+            searchGrid.innerHTML = '';
+            products.forEach((p, index) => {
+                if (p.name.toLowerCase().includes(query)) {
+                    searchGrid.innerHTML += `<div class="product-card" onclick="openProduct(${index})"><img src="${p.images[0]}" class="card-img"><div class="card-info"><div>${p.name}</div><div class="card-price">Rs. ${p.price}</div></div></div>`;
+                }
+            });
+            searchGrid.style.display = 'grid';
+            mainCats.forEach(el => el.style.display = 'none');
+        } else {
+            searchGrid.style.display = 'none';
+            mainCats.forEach(el => el.style.display = 'grid');
+            document.querySelectorAll('.category-header').forEach(el => el.style.display = 'block');
+        }
+    }
+
+    function showHome() { 
+        document.getElementById('home-view').style.display = 'block';
+        document.getElementById('product-view').style.display = 'none';
+        document.getElementById('admin-panel').style.display = 'none';
+    }
+</script>
+</body>
+</html>
